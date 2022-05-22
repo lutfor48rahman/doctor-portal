@@ -2,15 +2,18 @@ import React from 'react';
 import cavity from '../../assets/images/cavity.png'
 import fluoride from '../../assets/images/fluoride.png'
 import whitening from '../../assets/images/whitening.png'
+import treatment from '../../assets/images/treatment.png'
 import Service from './Service';
+import ServiceCare from './ServiceCare';
 
 const Services = () => {
+    const name= 'Exceptional dentalcare on your terms';
     const services = [
         {
             _id: 1,
             name: 'Fluoride Treatment',
             describtion: '',
-            img: fluoride
+            img: cavity
         },
         {
             _id: 2,
@@ -22,7 +25,7 @@ const Services = () => {
             _id: 3,
             name: 'Teeth Whitening',
             describtion: '',
-            img: fluoride
+            img: whitening
         }
     ];
     return (
@@ -40,6 +43,11 @@ const Services = () => {
                     ></Service>)
                 }
             </div>
+           <div className='mt-10'>
+           <ServiceCare 
+           img={treatment}
+           name={name} ></ServiceCare>
+           </div>
 
         </div>
     );
