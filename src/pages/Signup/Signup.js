@@ -1,39 +1,47 @@
 import React from 'react';
-import { useSignInWithEmailAndPassword, useSignInWithGoogle } from 'react-firebase-hooks/auth';
+import { useCreateUserWithEmailAndPassword, useSignInWithGoogle, useUpdateProfile } from 'react-firebase-hooks/auth';
+import { useForm } from 'react-hook-form';
+import { Link, useNavigate } from 'react-router-dom';
 import auth from '../../firebase.init';
-import { useForm } from "react-hook-form";
 import Loading from '../Shared/Loading';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
 
-const Login = () => {
+const Signup = () => {
+    // SignInwithGoogle
     const [signInWithGoogle, gUser, gLoading, gError] = useSignInWithGoogle(auth);
     const { register, formState: { errors }, handleSubmit } = useForm();
 
+    //Create a new User
     const [
-        signInWithEmailAndPassword,
+        createUserWithEmailAndPassword,
         user,
         loading,
         error,
-      ] = useSignInWithEmailAndPassword(auth);
-      const navigate = useNavigate();
-      const location = useLocation();
-      const from = location.state?.from?.pathname || "/" ;
+      ] = useCreateUserWithEmailAndPassword(auth);
 
-    if (user || gUser) {
-        navigate(from,{replace:true});
+      //Update Profile
+      const [updateProfile, updating, updateError] = useUpdateProfile(auth);
+
+      //Navigat
+      const navigate = useNavigate();
+
+      if (user || gUser) {
+        console.log(user || gUser);
     }
 
-    if(loading || gLoading){
+    if(loading || gLoading || updating){
         return <Loading></Loading>
     }
     let signError;
-    if(error || gError){
-         signError = <p className='text-red-500'>{error?.message || gError?.message}</p>
+    if(error || gError || updateError){
+         signError = <p className='text-red-500'>{error?.message || gError?.message || updateError?.message}</p>
     }
-    const onSubmit = data => {
-        signInWithEmailAndPassword(data.email,data.password);
-    };
 
+      const onSubmit =async data => {
+       await createUserWithEmailAndPassword(data.email,data.password);
+        await updateProfile({ displayName:data.name});
+          navigate('/appointment');
+
+    };
     return (
         <div className='flex h-screen justify-center items-center'>
             <div class="card w-96 bg-base-100 shadow-xl">
@@ -45,6 +53,20 @@ const Login = () => {
 
 
                         <div class="form-control w-full max-w-xs">
+                            <label class="label">
+                                <span class="label-text">Name</span>
+                            </label>
+                            <input
+                                type="text"
+                                placeholder="Your Name"
+                                class="input input-bordered w-full max-w-xs"
+                                {...register("name", {
+                                    required: {
+                                        value: true,
+                                        message:'Name is required'
+                                    }
+                                })}
+                            />
                             <label class="label">
                                 <span class="label-text">Email</span>
                             </label>
@@ -67,6 +89,8 @@ const Login = () => {
                                 {errors.email?.type === 'required' && <span class="label-text-alt text-red-500">{errors.email.message}</span>}
                                 {errors.email?.type === 'pattern' && <span class="label-text-alt">{errors.email.message}</span>}
                             </label>
+
+
 
                             <label class="label">
                                 <span class="label-text">Password</span>
@@ -91,14 +115,41 @@ const Login = () => {
                                 {errors.password?.type === 'minLength' && <span class="label-text-alt">{errors.password.message}</span>}
                             </label>
 
+
+
+                            <label class="label">
+                                <span class="label-text">Confirm Password</span>
+                            </label>
+                            <input
+                                type="password"
+                                placeholder="Confirm Your Password"
+                                class="input input-bordered w-full max-w-xs"
+                                {...register("password", {
+                                    required: {
+                                        value: true,
+                                        message: "Dont't matched password"
+                                    },
+                                    minLength: {
+                                        value: 6,
+                                        message: 'Provide minimum 6 charecters password'
+                                    }
+                                })}
+                            />
+                            <label class="label">
+                                {errors.password?.type === 'required' && <span class="label-text-alt text-red-500">{errors.password.message}</span>}
+                                {errors.password?.type === 'minLength' && <span class="label-text-alt">{errors.password.message}</span>}
+                            </label>
+
+
+
                         </div>
-                                {signError}
-                        <input className='btn w-full max-w-xs' type="submit" value='Login' />
+                        {signError}
+                        <input className='btn w-full max-w-xs' type="submit" value='Sign Up' />
                     </form>
-                        <p><small>New to Doctors Portal <Link className='text-primary' to='/signup'>Create a new account</Link></small></p>
+                        <p><small>Already have an account <Link className='text-primary' to='/login'>Login</Link></small></p>
                     <div class="divider">OR</div>
                     <button
-                        onClick={() => signInWithGoogle()}
+                        onClick={() => createUserWithEmailAndPassword()}
                         class="btn btn-outline flex justify-items-center"
                     >continue With Google</button>
                 </div>
@@ -107,4 +158,4 @@ const Login = () => {
     );
 };
 
-export default Login;
+export default Signup;
