@@ -3,6 +3,7 @@ import { useCreateUserWithEmailAndPassword, useSignInWithGoogle, useUpdateProfil
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import auth from '../../firebase.init';
+import useToken from '../../hooks/useToken';
 import Loading from '../Shared/Loading';
 
 const Signup = () => {
@@ -10,7 +11,7 @@ const Signup = () => {
     const [signInWithGoogle, gUser, gLoading, gError] = useSignInWithGoogle(auth);
     const { register, formState: { errors }, handleSubmit } = useForm();
 
-    //Create a new User
+    //Manualy Create a new User
     const [
         createUserWithEmailAndPassword,
         user,
@@ -21,11 +22,13 @@ const Signup = () => {
       //Update Profile
       const [updateProfile, updating, updateError] = useUpdateProfile(auth);
 
+      const [token] = useToken(user || gUser);
+
       //Navigat
       const navigate = useNavigate();
 
-      if (user || gUser) {
-        console.log(user || gUser);
+      if (token) {
+        navigate('/appointment');
     }
 
     if(loading || gLoading || updating){
@@ -39,14 +42,14 @@ const Signup = () => {
       const onSubmit =async data => {
        await createUserWithEmailAndPassword(data.email,data.password);
         await updateProfile({ displayName:data.name});
-          navigate('/appointment');
+          
 
     };
     return (
         <div className='flex h-screen justify-center items-center'>
             <div class="card w-96 bg-base-100 shadow-xl">
                 <div class="card-body">
-                    <h1 className='text-center text-2xl text-bold'>Login</h1>
+                    <h1 className='text-center text-2xl text-bold'>Sign Up</h1>
 
 
                     <form onSubmit={handleSubmit(onSubmit)}>
@@ -117,7 +120,7 @@ const Signup = () => {
 
 
 
-                            <label class="label">
+                            {/* <label class="label">
                                 <span class="label-text">Confirm Password</span>
                             </label>
                             <input
@@ -138,7 +141,7 @@ const Signup = () => {
                             <label class="label">
                                 {errors.password?.type === 'required' && <span class="label-text-alt text-red-500">{errors.password.message}</span>}
                                 {errors.password?.type === 'minLength' && <span class="label-text-alt">{errors.password.message}</span>}
-                            </label>
+                            </label> */}
 
 
 
@@ -149,7 +152,7 @@ const Signup = () => {
                         <p><small>Already have an account <Link className='text-primary' to='/login'>Login</Link></small></p>
                     <div class="divider">OR</div>
                     <button
-                        onClick={() => createUserWithEmailAndPassword()}
+                        onClick={() => signInWithGoogle()}
                         class="btn btn-outline flex justify-items-center"
                     >continue With Google</button>
                 </div>
